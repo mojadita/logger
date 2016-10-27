@@ -54,25 +54,28 @@
 
 /* types */
 typedef struct logg_chan_class_s {
-    int           (*lc_open)();
-    int           (*lc_close)();
-    int           (*lc_rotate)();
-    ssize_t       (*lc_write)(const char *str);
-    ssize_t       (*lc_flush)();
+    int               (*lc_open)();
+    int               (*lc_close)();
+    int               (*lc_rotate)();
+    ssize_t           (*lc_write)(const char *str);
+    ssize_t           (*lc_flush)();
 } LOGG_CHAN_CLASS, *LOGG_CHAN_CLASS_P;
 
 typedef struct logg_chan_s {
-    LOGG_CHAN_CLASS_P *lcc_class;
+    LOGG_CHAN_CLASS_P  *lcc_class;
+    AVL_TREE           *lcc_by_func;
+    AVL_TREE           *lcc_by_line;
+    LLIST_T             lcc_all;
 } LOGG_CHANN_T, *LOGG_CHANN_P;
 
 typedef struct logger_s {
-    int             lg_flags; /* flags for message output */
-    int             lg_crit; /* -1 used as wilcard */
-    char           *lg_file; /* NULL used as wilcard */
-    int             lg_line_start; /* -1 used as wilcard */
-    int             lg_line_end; /* -1 used as wilcard */
-    char           *lg_func; /* NULL used as wilcard */
-    LOGG_CHANN_P    lg_chann; /* pointer to device entry point */
+    int                 lg_flags; /* flags for message output */
+    int                 lg_crit; /* -1 used as wilcard */
+    char               *lg_file; /* NULL used as wilcard */
+    int                 lg_line_begin; /* -1 used as wilcard */
+    int                 lg_line_end; /* -1 used as wilcard */
+    char               *lg_func; /* NULL used as wilcard */
+    LOGG_CHANN_P        lg_chann; /* pointer to device entry point */
 } LOGGER_T, *LOGGER_P;
 
 /* prototypes */
@@ -80,7 +83,8 @@ typedef struct logger_s {
 ssize_t loggv(
         int             crit,
         const char     *file,
-        const int       line,
+        const int       begin,
+        const int       end,
         const char     *func,
         const char     *fmt,
         va_list         args);
