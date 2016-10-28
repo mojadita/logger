@@ -1,0 +1,6 @@
+[submodule "lists"]
+	path = lists
+	url = git@github.com:mojadita/lists.git
+[submodule "avl_c"]
+	path = avl_c
+	url = git@github.com:mojadita/avl_c.git

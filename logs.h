@@ -24,7 +24,8 @@
 #define LOGS_H
 
 #include <sys/types.h>
-#include <avl.h>
+#include "avl_c/avl.h"
+#include "lists/lists.h"
 
 /* constants */
 #define LOGG_DEB         (7 << 5)
