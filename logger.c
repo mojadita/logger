@@ -19,9 +19,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#define IN_LOGS_C
+#define IN_LOGGER_C
 
-#include "logs.h"
+#include "logger.h"
 
 /* Standard include files */
 
@@ -32,7 +32,6 @@
 /* prototypes */
 
 /* variables */
-static char LOGS_C_RCSId[]="\n$Id: main.c.m4,v 1.7 2005/11/07 19:39:53 luis Exp $\n";
 
 /* functions */
 
