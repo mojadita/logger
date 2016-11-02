@@ -24,8 +24,7 @@
 #define LOGGER_H
 
 #include <sys/types.h>
-#include "avl_c/avl.h"
-#include "lists/lists.h"
+#include <stdarg.h>
 
 /* constants */
 /* the five less signifiant bits are there to allow for extension of
@@ -68,7 +67,6 @@ typedef struct logg_chann_ops_s {
     int               (*co_rotate)(LOGG_CHANN *chann);
     ssize_t           (*co_write)(LOGG_CHANN *chann, const char *str);
     ssize_t           (*co_flush)(LOGG_CHANN *chann);
-    AVL_TREE            co_channs;
 } *LOGG_CHANN_OPS;
 
 typedef struct logg_chann_s {
