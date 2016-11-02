@@ -21,7 +21,7 @@
 
 #define IN_LOGGER_C
 
-#include "logger.h"
+#include "loggerP.h"
 
 /* Standard include files */
 
@@ -32,6 +32,9 @@
 /* prototypes */
 
 /* variables */
+
+static struct log_global {
+} log_global_ctx;
 
 /* functions */
 

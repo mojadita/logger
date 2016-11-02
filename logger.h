@@ -58,20 +58,65 @@
 
 /* types */
 
-typedef struct logger_chann_class_s *LOGGER_CHAN_CLASS;
-typedef struct logger_chann_s       *LOGGER_CHANN;
-typedef struct logger_s             *LOGGER;
+typedef struct logg_chann_ops_s    *LOGG_CHAN_OPS;
+typedef struct logg_chann_s        *LOGG_CHANN;
+
+typedef struct logg_chann_ops_s {
+    char               *co_name;
+    LOGG_CHANN        (*co_open)(const char *name, va_list p);
+    int               (*co_close)(LOGG_CHANN *chann);
+    int               (*co_rotate)(LOGG_CHANN *chann);
+    ssize_t           (*co_write)(LOGG_CHANN *chann, const char *str);
+    ssize_t           (*co_flush)(LOGG_CHANN *chann);
+    AVL_TREE            co_channs;
+} *LOGG_CHANN_OPS;
+
+typedef struct logg_chann_s {
+    char               *ch_name;
+    LOGG_CHANN_OPS      ch_channops;
+} *LOGG_CHANN;
 
 /* prototypes */
 
-int logg_init();
+int  logg_init();
 void logg_end();
+
+int logg_register_channops(
+        LOGG_CHANN_OPS channops);
+
+int logg_unregister_channops(
+        LOGG_CHAN_OPS channops);
+
+LOGG_CHANN logg_new_chann(
+        LOGG_CHAN_OPS channops,
+        const char *name,
+        ...);
+
+LOGG_CHANN logg_new_channv(
+        LOGG_CHAN_OPS channops,
+        const char *name,
+        va_list args);
+
+void logg_add_log(
+        LOGG_CHANN      chan,
+        int             crit,
+        const char     *file,
+        const char     *func,
+        const int       line_start,
+        const int       line_end);
+
+void logg_del_log(
+        LOGG_CHANN      chan,
+        int             crit,
+        const char     *file,
+        const char     *func,
+        const int       line_start,
+        const int       line_end);
 
 ssize_t loggv(
         int             crit,
         const char     *file,
-        const int       line_start,
-        const int       line_end,
+        const int       line,
         const char     *func,
         const char     *fmt,
         va_list         args);
@@ -79,29 +124,10 @@ ssize_t loggv(
 ssize_t logg(
         int             crit,
         const char     *file,
-        const int       line_start,
-        const int       line_end,
+        const int       line,
         const char     *func,
         const char     *fmt,
         ...);
-
-LOGGER_CTX
-logger_new(
-        char          **envp);
-
-LOGGER_CHANN
-logger_chan_new(LOGGER_CTX ctx, char *typ, ...);
-
-LOGGER logger_new(
-        LOGGER_CTX      ctx,
-        LOGGER_CHANN    chn, 
-        int             flags,
-        int             crit,
-        char           *file,
-        int             line_start,
-        int             line_end,
-        char           *func,
-        LOGG_CHANN_P    chan);
 
 #endif /* LOGGER_H */
 /* Do not include anything AFTER the line above, as it would not be
