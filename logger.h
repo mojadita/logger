@@ -57,10 +57,10 @@
 
 /* types */
 
-typedef struct logg_chann_ops_s    *LOGG_CHAN_OPS;
-typedef struct logg_chann_s        *LOGG_CHANN;
+typedef struct logg_chann_ops      *LOGG_CHAN_OPS;
+typedef struct logg_chann          *LOGG_CHANN;
 
-typedef struct logg_chann_ops_s {
+typedef struct logg_chann_ops {
     char               *co_name;
     LOGG_CHANN        (*co_open)(const char *name, va_list p);
     int               (*co_close)(LOGG_CHANN *chann);
@@ -69,7 +69,7 @@ typedef struct logg_chann_ops_s {
     ssize_t           (*co_flush)(LOGG_CHANN *chann);
 } *LOGG_CHANN_OPS;
 
-typedef struct logg_chann_s {
+typedef struct logg_chann {
     char               *ch_name;
     LOGG_CHANN_OPS      ch_channops;
 } *LOGG_CHANN;
