@@ -54,7 +54,7 @@ typedef struct logg_registry {
 
 /* prototypes */
 static int   logg_registry_comparator(const void *_a, const void *_b);
-static const void *logg_registry_constructor(const void *_a);
+static void *logg_registry_constructor(const void *_a);
 static void  logg_registry_destructor(const void *_a);
 static int   logg_registry_print(const void *_a, FILE *o);
 
@@ -101,7 +101,7 @@ static int logg_registry_comparator(const void *_a, const void *_b)
     return a->lr_line - b->lr_line;
 } /* log_registry_comparator */
 
-static const void *logg_registry_constructor(const void *_a)
+static void *logg_registry_constructor(const void *_a)
 {
     LOGG_REGISTRY_KEY res = malloc(sizeof *res);
     const struct logg_registry_key *a = _a;
