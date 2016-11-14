@@ -35,14 +35,16 @@
 /* types */
 
 typedef struct logg_registry {
-    u_int64_t       lr_count_selected;
-    u_int64_t       lr_count_unselected;
-    struct timespec lr_last_time;
-
     int             lr_crit;
     char           *lr_file;
     char           *lr_func;
     int             lr_line;
+
+    LLIST_T         lr_chanlist;
+
+    u_int64_t       lr_count_selected;
+    u_int64_t       lr_count_total;
+    struct timespec lr_last_time;
 } *LOGG_REGISTRY;
 
 /* prototypes */
