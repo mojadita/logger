@@ -88,6 +88,7 @@ int logg_init()
 
 
 
+
 /* static functions */
 
 static int logg_registry_comparator(const void *_a, const void *_b)

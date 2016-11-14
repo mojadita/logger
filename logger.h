@@ -26,6 +26,8 @@
 #include <sys/types.h>
 #include <stdarg.h>
 
+#include "avl_c/avl.h"
+
 /* constants */
 /* the five less signifiant bits are there to allow for extension of
  * logger levels, so more granularity is allowed than the proposed
@@ -70,6 +72,7 @@ typedef struct logg_chann_ops {
     int               (*co_rotate)(LOGG_CHANN *chann);
     ssize_t           (*co_write)(LOGG_CHANN *chann, const char *str);
     ssize_t           (*co_flush)(LOGG_CHANN *chann);
+    AVL_TREE            co_channs;
 } *LOGG_CHANN_OPS;
 
 typedef struct logg_chann {
@@ -93,6 +96,10 @@ LOGG_CHANN logg_register_chann(
 
 int logg_unregister_chann(
         LOGG_CHANN      chann);
+
+LOGG_CHANN logg_lookup_chann(
+        char           *chanops_name,
+        char           *chan_name);
 
 LOGG_LOG logg_add_log(
         int             crit,
