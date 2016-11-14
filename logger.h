@@ -89,10 +89,10 @@ int logg_unregister_channops(
         LOGG_CHAN_OPS   channops);
 
 LOGG_CHANN logg_register_chann(
-        LOGG_CHAN       chann);
+        LOGG_CHANN      chann);
 
 int logg_unregister_chann(
-        LOGG_CHAN       chann);
+        LOGG_CHANN      chann);
 
 LOGG_LOG logg_add_log(
         int             crit,
