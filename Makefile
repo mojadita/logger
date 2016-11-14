@@ -27,7 +27,7 @@ logger_DEVLIB	?= lib$(PACKAGE).so
 logger_SONAME   ?= $(logger_DEVLIB).$(logger_MAJOR)
 logger_LIB      ?= $(logger_SONAME).$(logger_MINOR)
 logger_VERSION  ?= $(logger_MAJOR).$(logger_MINOR)
-logger_OBJS     ?= logger.so
+logger_OBJS     ?= logger.pic_o
 TOCLEAN			+= $(logger_OBJS)
 
 includes		+= logger.h
@@ -35,10 +35,18 @@ targets			=  $(logger_LIB)
 TOCLEAN         += $(targets)
 
 PHONYS			?= all clean install uninstall
-.SUFFIXES: .so
+.SUFFIXES: .pic_o
 .PHONY: $(PHONYS) subdirs
 
 all:: $(targets)
+
+$(PHONYS)::
+	@for i in $(SUBDIRS); \
+	do \
+		echo $(MAKE) -C $$i $@; \
+		$(MAKE) -C $$i $@; \
+	done
+
 clean::
 	$(RM) $(TOCLEAN)
 install:: $(targets)
@@ -69,14 +77,7 @@ uninstall::
 		$(RM) $(libdir)/$$i; \
 	done;
 
-$(PHONYS)::
-	@for i in $(SUBDIRS); \
-	do \
-		echo $(MAKE) -C $$i $@; \
-		$(MAKE) -C $$i $@; \
-	done
-
-.c.so:
+.c.pic_o:
 	$(CC) $(CFLAGS) -c -fPIC -o $@ $<
 
 $(logger_LIB): $(logger_OBJS)

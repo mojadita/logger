@@ -47,18 +47,21 @@
 #define FATAL(fmt, args...)    log(LOGG_FAT, __FILE__, __LINE__, __func__, (fmt), ##args)
 
 #define LOGG_TIMESTAMP         (1 << 0) /* do we output timestamp */
-#define LOGG_FILENAME          (1 << 1) /* do we output filename */
-#define LOGG_LINENUM           (1 << 2) /* '' line number */
-#define LOGG_FUNCNAME          (1 << 3) /* '' function name */
-#define LOGG_COLOR             (1 << 4) /* '' ansi color sequences(if channel admits it) */
+#define LOGG_CRIT              (1 << 1)
+#define LOGG_FILENAME          (1 << 2) /* do we output filename */
+#define LOGG_LINENUM           (1 << 3) /* '' line number */
+#define LOGG_FUNCNAME          (1 << 4) /* '' function name */
+#define LOGG_COLOR             (1 << 5) /* '' ansi color sequences(if channel admits it) */
 
-#define LOGG_ALL               (LOGG_TIMESTAMP | LOGG_FILENAME |\
-                                LOGG_LINENUM   | LOGG_FUNCNAME)
+#define LOGG_ALL               (LOGG_TIMESTAMP | LOGG_CRIT |\
+                                LOGG_FILENAME | LOGG_LINENUM |\
+                                LOGG_FUNCNAME)
 
 /* types */
 
 typedef struct logg_chann_ops      *LOGG_CHAN_OPS;
 typedef struct logg_chann          *LOGG_CHANN;
+typedef struct logg_log            *LOGG_LOG;
 
 typedef struct logg_chann_ops {
     char               *co_name;
@@ -80,36 +83,27 @@ int  logg_init();
 void logg_end();
 
 int logg_register_channops(
-        LOGG_CHANN_OPS channops);
+        LOGG_CHANN_OPS  channops);
 
 int logg_unregister_channops(
-        LOGG_CHAN_OPS channops);
+        LOGG_CHAN_OPS   channops);
 
-LOGG_CHANN logg_new_chann(
-        LOGG_CHAN_OPS channops,
-        const char *name,
-        ...);
+LOGG_CHANN logg_register_chann(
+        LOGG_CHAN       chann);
 
-LOGG_CHANN logg_new_channv(
-        LOGG_CHAN_OPS channops,
-        const char *name,
-        va_list args);
+int logg_unregister_chann(
+        LOGG_CHAN       chann);
 
-void logg_add_log(
-        LOGG_CHANN      chan,
+LOGG_LOG logg_add_log(
         int             crit,
         const char     *file,
         const char     *func,
         const int       line_start,
-        const int       line_end);
+        const int       line_end,
+        LOGG_CHANN      chan);
 
-void logg_del_log(
-        LOGG_CHANN      chan,
-        int             crit,
-        const char     *file,
-        const char     *func,
-        const int       line_start,
-        const int       line_end);
+int logg_del_log(
+        LOGG_LOG        log);
 
 ssize_t loggv(
         int             crit,
