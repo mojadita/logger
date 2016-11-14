@@ -85,6 +85,8 @@ typedef struct logg_chann {
 int  logg_init();
 void logg_end();
 
+int logg_load(char *name);
+
 int logg_register_channops(
         LOGG_CHANN_OPS  channops);
 
