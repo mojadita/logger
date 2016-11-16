@@ -92,11 +92,11 @@ static struct logg_global {
 
 static char *logg_crits[] = {
     "FATAL",
-    "CRITICAL",
-    "EMERGENCY",
+    "CRITI",
+    "EMERG",
     "ERROR",
-    "WARNING",
-    "INFORMATION",
+    "WARNG",
+    "INFOR",
     "DEBUG"
 };
 static int logg_crits_n = sizeof logg_crits / sizeof logg_crits[0];
@@ -150,7 +150,7 @@ LOGG_CHANN_OPS logg_channop_lookup(char *name)
             char dlname[MAX_DLNAME_LENGTH];
             void *dldesc;
 
-            snprintf(dlname, sizeof dlname, "%s/logg%s.so", path[i], name);
+            snprintf(dlname, sizeof dlname, "%s/logg_%s.so", path[i], name);
             DEBUG("trying [%s]\n", dlname);
             if (!(dldesc = dlopen(dlname, RTLD_LAZY | RTLD_LOCAL))) {
                 INFO("dlopen: %s: %s\n", dlname, dlerror());
@@ -253,7 +253,7 @@ ssize_t loggv(
                 crit,
                 crit_ix < logg_crits_n
                     ? logg_crits[crit_ix]
-                    : "UNKNOWN",
+                    : "VRB0S",
                 file, line, func,
                 lines[i]);
     } /* for */

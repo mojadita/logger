@@ -1,3 +1,5 @@
 *.o
 *.so.*
 *.pic_o
+.depend
+test_logger
