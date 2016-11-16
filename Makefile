@@ -32,9 +32,10 @@ TOCLEAN			+= $(logger_OBJS)
 
 includes		+= logger.h
 targets			=  $(logger_LIB)
+test_targets	+= test_logger
 TOCLEAN         += $(targets)
 
-PHONYS			?= all clean install uninstall
+PHONYS			?= all clean install uninstall test
 .SUFFIXES: .pic_o
 .PHONY: $(PHONYS) subdirs
 
@@ -76,9 +77,24 @@ uninstall::
 		echo $(RM) $(libdir)/$$i; \
 		$(RM) $(libdir)/$$i; \
 	done;
+test:: $(test_targets)
+	@for i in $(test_targets); \
+	do \
+		echo $$i; \
+		$$i; \
+	done
+
+depend:
+	gcc -MM *.c >.depend
 
 .c.pic_o:
 	$(CC) $(CFLAGS) -c -fPIC -o $@ $<
 
 $(logger_LIB): $(logger_OBJS)
 	$(CC) $(LDFLAGS) -o $@ -shared -Wl,-soname=$(logger_SONAME) $(logger_OBJS)
+
+test_logger_objs = test.o $(logger_LIB) avl_c/libavl.so
+test_logger: $(test_logger_objs)
+	$(CC) $(LDFLAGS) -o $@ $(test_logger_objs)
+
+-include .depend

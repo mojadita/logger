@@ -32,21 +32,23 @@
 /* the five less signifiant bits are there to allow for extension of
  * logger levels, so more granularity is allowed than the proposed
  * standard. */
-#define LOGG_DEB               (7 << 5)
-#define LOGG_INF               (6 << 5)
-#define LOGG_WAR               (5 << 5)
-#define LOGG_ERR               (4 << 5)
-#define LOGG_EMG               (3 << 5)
-#define LOGG_CRT               (2 << 5)
-#define LOGG_FAT               (1 << 5)
+#define LOGG_VER               ((6 << 5) | (1 << 4))
+#define LOGG_DEB               ((6 << 5) | (1 << 4))
+#define LOGG_INF               ((5 << 5) | (1 << 4))
+#define LOGG_WAR               ((4 << 5) | (1 << 4))
+#define LOGG_ERR               ((3 << 5) | (1 << 4))
+#define LOGG_CRT               ((2 << 5) | (1 << 4))
+#define LOGG_EMG               ((1 << 5) | (1 << 4))
+#define LOGG_FAT               ((0 << 5) | (1 << 4))
 
-#define DEBUG(fmt, args...)    log(LOGG_DEB, __FILE__, __LINE__, __func__, (fmt), ##args)
-#define INFO(fmt, args...)     log(LOGG_INF, __FILE__, __LINE__, __func__, (fmt), ##args)
-#define WARNING(fmt, args...)  log(LOGG_WAR, __FILE__, __LINE__, __func__, (fmt), ##args)
-#define ERROR(fmt, args...)    log(LOGG_ERR, __FILE__, __LINE__, __func__, (fmt), ##args)
-#define EMERG(fmt, args...)    log(LOGG_EMG, __FILE__, __LINE__, __func__, (fmt), ##args)
-#define CRITICAL(fmt, args...) log(LOGG_CRT, __FILE__, __LINE__, __func__, (fmt), ##args)
-#define FATAL(fmt, args...)    log(LOGG_FAT, __FILE__, __LINE__, __func__, (fmt), ##args)
+#define LOGG(lvl, fmt, args...) logg(lvl, __FILE__, __LINE__, __func__, (fmt), ##args)
+#define DEBUG(fmt, args...)     logg(LOGG_DEB, __FILE__, __LINE__, __func__, (fmt), ##args)
+#define INFO(fmt, args...)      logg(LOGG_INF, __FILE__, __LINE__, __func__, (fmt), ##args)
+#define WARNING(fmt, args...)   logg(LOGG_WAR, __FILE__, __LINE__, __func__, (fmt), ##args)
+#define ERROR(fmt, args...)     logg(LOGG_ERR, __FILE__, __LINE__, __func__, (fmt), ##args)
+#define EMERG(fmt, args...)     logg(LOGG_EMG, __FILE__, __LINE__, __func__, (fmt), ##args)
+#define CRITICAL(fmt, args...)  logg(LOGG_CRT, __FILE__, __LINE__, __func__, (fmt), ##args)
+#define FATAL(fmt, args...)     logg(LOGG_FAT, __FILE__, __LINE__, __func__, (fmt), ##args)
 
 #define LOGG_TIMESTAMP         (1 << 0) /* do we output timestamp */
 #define LOGG_CRIT              (1 << 1)
@@ -66,7 +68,7 @@ typedef struct logg_chann          *LOGG_CHANN;
 typedef struct logg_log            *LOGG_LOG;
 
 typedef struct logg_chann_ops {
-    char               *co_name;
+    const char         *co_name;
     LOGG_CHANN        (*co_open)(const char *name, va_list p);
     int               (*co_close)(LOGG_CHANN *chann);
     int               (*co_rotate)(LOGG_CHANN *chann);
@@ -85,7 +87,12 @@ typedef struct logg_chann {
 int  logg_init();
 void logg_end();
 
-int logg_load(char *name);
+LOGG_CHANN_OPS  logg_channop_lookup(
+        char *name);
+
+LOGG_CHANN      logg_chann_lookup(
+        LOGG_CHANN_OPS channops,
+        char *name);
 
 int logg_register_channops(
         LOGG_CHANN_OPS  channops);
