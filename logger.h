@@ -29,17 +29,19 @@
 #include "avl_c/avl.h"
 
 /* constants */
+
 /* the five less signifiant bits are there to allow for extension of
  * logger levels, so more granularity is allowed than the proposed
  * standard. */
-#define LOGG_VER               ((6 << 5) | (1 << 4))
-#define LOGG_DEB               ((6 << 5) | (1 << 4))
-#define LOGG_INF               ((5 << 5) | (1 << 4))
-#define LOGG_WAR               ((4 << 5) | (1 << 4))
-#define LOGG_ERR               ((3 << 5) | (1 << 4))
-#define LOGG_CRT               ((2 << 5) | (1 << 4))
-#define LOGG_EMG               ((1 << 5) | (1 << 4))
-#define LOGG_FAT               ((0 << 5) | (1 << 4))
+#define __LOGG_FREE_BITS         5
+#define LOGG_VER               ((7 << __LOGG_FREE_BITS) | (1 << (__LOGG_FREE_BITS-1)))
+#define LOGG_DEB               ((6 << __LOGG_FREE_BITS) | (1 << (__LOGG_FREE_BITS-1)))
+#define LOGG_INF               ((5 << __LOGG_FREE_BITS) | (1 << (__LOGG_FREE_BITS-1)))
+#define LOGG_WAR               ((4 << __LOGG_FREE_BITS) | (1 << (__LOGG_FREE_BITS-1)))
+#define LOGG_ERR               ((3 << __LOGG_FREE_BITS) | (1 << (__LOGG_FREE_BITS-1)))
+#define LOGG_CRT               ((2 << __LOGG_FREE_BITS) | (1 << (__LOGG_FREE_BITS-1)))
+#define LOGG_EMG               ((1 << __LOGG_FREE_BITS) | (1 << (__LOGG_FREE_BITS-1)))
+#define LOGG_FAT               ((0 << __LOGG_FREE_BITS) | (1 << (__LOGG_FREE_BITS-1)))
 
 #define LOGG(lvl, fmt, args...) logg(lvl, __FILE__, __LINE__, __func__, (fmt), ##args)
 #define DEBUG(fmt, args...)     logg(LOGG_DEB, __FILE__, __LINE__, __func__, (fmt), ##args)
@@ -60,6 +62,10 @@
 #define LOGG_ALL               (LOGG_TIMESTAMP | LOGG_CRIT |\
                                 LOGG_FILENAME | LOGG_LINENUM |\
                                 LOGG_FUNCNAME)
+
+/* error codes */
+#define LOGG_ERR_SUCCESS                             0
+#define LOGG_ERR_CHANNOP_ALREADY_REGISTERED         -1
 
 /* types */
 
@@ -93,12 +99,6 @@ LOGG_CHANN_OPS  logg_channop_lookup(
 LOGG_CHANN      logg_chann_lookup(
         LOGG_CHANN_OPS channops,
         char *name);
-
-int logg_register_channops(
-        LOGG_CHANN_OPS  channops);
-
-int logg_unregister_channops(
-        LOGG_CHAN_OPS   channops);
 
 LOGG_CHANN logg_register_chann(
         LOGG_CHANN      chann);
@@ -136,6 +136,18 @@ ssize_t logg(
         const char     *func,
         const char     *fmt,
         ...);
+
+/* support for modules register/unregister */
+
+#define LOGG_INIT_FUNC(modname, parname) AVL_ITERATOR modname##_init(const char *parname)
+#define LOGG_FINI_FUNC(modname, parname) int modname##_fini(const char *parname)
+
+AVL_ITERATOR logg_register_channops(
+        const char     *name,
+        LOGG_CHANN_OPS  channops);
+
+int logg_unregister_channops(
+        LOGG_CHAN_OPS   channops);
 
 #endif /* LOGGER_H */
 /* Do not include anything AFTER the line above, as it would not be

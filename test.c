@@ -1,20 +1,28 @@
-
+#include <stdlib.h>
 #include "logger.h"
 
 int main()
 {
     LOGG_CHANN_OPS channop;
-    logg_init();
-    channop = logg_channop_lookup("a");
-    DEBUG(      "PRUEBA DE MENSAJE EN DOS LÍNEAS\nCON UN NÚMERO (%d)\n", 36);
-    INFO(       "PRUEBA DE MENSAJE EN DOS LÍNEAS\nCON UN NÚMERO (%d)\n", 36);
-    WARNING(    "PRUEBA DE MENSAJE EN DOS LÍNEAS\nCON UN NÚMERO (%d)\n", 36);
-    ERROR(      "PRUEBA DE MENSAJE EN DOS LÍNEAS\nCON UN NÚMERO (%d)\n", 36);
-    CRITICAL(   "PRUEBA DE MENSAJE EN DOS LÍNEAS\nCON UN NÚMERO (%d)\n", 36);
-    EMERG(      "PRUEBA DE MENSAJE EN DOS LÍNEAS\nCON UN NÚMERO (%d)\n", 36);
-    FATAL(      "PRUEBA DE MENSAJE EN DOS LÍNEAS\nCON UN NÚMERO (%d)\n", 36);
-    logg(50, __FILE__, __LINE__, __func__, "PRUEBA DE MENSAJE EN DOS LÍNEAS\nCON UN NÚMERO (%d)\n", 36);
-    logg(37, __FILE__, __LINE__, __func__, "ULTIMA PRUEBA\n(en dos lineas también)\n\n");
-    logg(5000, __FILE__, __LINE__, __func__, "Otra prueba más\n(en dos lineas también)\n\n");
+    int i;
+    char *test_module = "sample";
 
+    logg_init();
+    channop = logg_channop_lookup(test_module);
+    LOGG(4500, "logg_channop_lookup(\"%s\") ==> %#p", test_module, channop);
+    logg(5000, __FILE__, __LINE__, __func__, "Prueba de mensaje verboso");
+    DEBUG(      "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
+    INFO(       "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
+    WARNING(    "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
+    ERROR(      "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
+    CRITICAL(   "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
+    EMERG(      "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
+    FATAL(      "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
+    
+    LOGG(50,    "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
+    LOGG(37,    "LAST TEST\n(also in two lines)\n\n");
+    for(i = 0; i < 768; i++)
+        LOGG(i, "LOGG line to see crit values, this time i == %d", i);
+
+    return EXIT_SUCCESS;
 } /* main */

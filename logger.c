@@ -95,7 +95,7 @@ static char *logg_crits[] = {
     "CRITI",
     "EMERG",
     "ERROR",
-    "WARNG",
+    "WARNI",
     "INFOR",
     "DEBUG"
 };
@@ -122,33 +122,55 @@ int logg_init()
     return 0;
 } /* logg_init */
 
+AVL_ITERATOR logg_register_channops(
+        const char     *name,
+        LOGG_CHANN_OPS  channops)
+{
+    AVL_ITERATOR it = avl_tree_atkey(
+            logg_global_ctx.gl_chann_ops,
+            name,
+            MT_EQ);
+    if (it) {
+        DEBUG("key \"%s\" already registered", name);
+        return NULL;
+    }
+    it = avl_tree_put(
+            logg_global_ctx.gl_chann_ops,
+            name,
+            channops);
+    channops->co_name = avl_iterator_key(it);
+    return it;
+} /* logg_register_channops */
+
 LOGG_CHANN_OPS logg_channop_lookup(char *name)
 {
     LOGG_CHANN_OPS res;
-    DEBUG("looking for entry \"%s\"\n", name);
+    DEBUG("looking for channops \"%s\"\n", name);
     AVL_ITERATOR it = avl_tree_atkey(logg_global_ctx.gl_chann_ops,
             name,
             MT_EQ);
     if (!it) { /* doesn't exist */
         static char *path[MAX_PATH_ELEMENTS] = {0};
         int i;
-        DEBUG("not found, creating entry \"%s\"\n", name);
+        DEBUG("not registered, looking for \"%s\" module", name);
         if (!path[0]) {
             char *path_env = getenv("LOGGER_PATH");
             int i;
-            if (!path_env) path_env = DEFAULT_LOGGER_PATH;
+            if (!path_env || !*path_env) path_env = DEFAULT_LOGGER_PATH;
             static char path_buffer[MAX_PATH_LENGTH];
             char *strtok_ctx;
-            DEBUG("initializing path with \"%s\"\n", path_env);
+
+            DEBUG("initializing search path with \"%s\"\n", path_env);
             strncpy(path_buffer, path_env, sizeof path_buffer);
             for (   i = 0, path[i] = strtok_r(path_buffer, ":", &strtok_ctx);
                     path[i] && (i < MAX_PATH_ELEMENTS);
                     path[++i] = strtok_r(NULL, ":", &strtok_ctx))
-                DEBUG("path += [%s];", path[i]);
+                DEBUG("adding directory \"%s\" to path list", path[i]);
         } /* if */
         for (i = 0; path[i]; i++) {
             char dlname[MAX_DLNAME_LENGTH];
             void *dldesc;
+            AVL_ITERATOR (*init_func)(const char *);
 
             snprintf(dlname, sizeof dlname, "%s/logg_%s.so", path[i], name);
             DEBUG("trying [%s]\n", dlname);
@@ -156,23 +178,23 @@ LOGG_CHANN_OPS logg_channop_lookup(char *name)
                 INFO("dlopen: %s: %s\n", dlname, dlerror());
                 continue;
             }
-            /* check if _init() entry point has registered
-             * chann_ops structure */
-            it = avl_tree_atkey(
-                logg_global_ctx.gl_chann_ops,
-                name,
-                MT_EQ);
-            if (it) { 
-                LOGG_CHANN_OPS chops = avl_iterator_data(it);
-                chops->co_name = (char *) avl_iterator_key(it);
-                break;
+            DEBUG("found [%s], trying init function", dlname);
+            snprintf(dlname, sizeof dlname, "%s_init", name);
+            init_func = dlsym(dldesc, dlname);
+            if (!init_func) {
+                DEBUG("no %s function found, continue", dlname);
+                continue;
+            }
+            it = init_func(name);
+            if (!it) {
+                INFO("%s(\"%s\") => module not registered, continue", dlname, name);
+                continue;
             } /* if */
-
-            INFO("\"%s\" has not registered properly into system, "
-                    "continue\n",
-                    dlname);
+            /* if we reach here, exit the loop, we registered a valid
+             * module */
+            break;
         } /* for */
-        if (!path[i]) { /* list exausted, error. */
+        if (!path[i]) { /* if list exausted, signal an error. */
             ERROR("%s not found, give up\n", name);
             return NULL;
         } /* if */
@@ -181,7 +203,7 @@ LOGG_CHANN_OPS logg_channop_lookup(char *name)
     /* now, we have a registered module */
     res = avl_iterator_data(it);
 
-    DEBUG("logg_channop_lookup(\"%s\") ==> %#p\n", name, res);
+    DEBUG("registration of module \"%s\" ==> %#p\n", name, res);
     return res;
 } /* logg_channop_lookup */
 
@@ -253,7 +275,7 @@ ssize_t loggv(
                 crit,
                 crit_ix < logg_crits_n
                     ? logg_crits[crit_ix]
-                    : "VRB0S",
+                    : "VERBO",
                 file, line, func,
                 lines[i]);
     } /* for */

@@ -31,7 +31,8 @@ logger_OBJS     ?= logger.pic_o
 TOCLEAN			+= $(logger_OBJS)
 
 includes		+= logger.h
-targets			=  $(logger_LIB)
+targets			=  $(mod_targets) $(logger_LIB)
+mod_targets     =  logg_sample.so
 test_targets	+= test_logger
 TOCLEAN         += $(targets)
 
@@ -96,5 +97,10 @@ $(logger_LIB): $(logger_OBJS)
 test_logger_objs = test.o $(logger_LIB) avl_c/libavl.so
 test_logger: $(test_logger_objs)
 	$(CC) $(LDFLAGS) -o $@ $(test_logger_objs)
+
+logg_sample.so_objs = sample.pic_o $(logger_LIB)
+logg_sample.so_libs = avl_c/libavl.so
+logg_sample.so: $(logg_sample.so_objs)
+	$(CC) $(LDFLAGS) -o $@ -shared $(logg_sample.so_objs) $(logg_sample.so_libs)
 
 -include .depend
