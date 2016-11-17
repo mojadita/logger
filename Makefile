@@ -51,6 +51,7 @@ $(PHONYS)::
 
 clean::
 	$(RM) $(TOCLEAN)
+
 install:: $(targets)
 	-@for i in $(incdir) $(libdir); \
 	do \
@@ -67,6 +68,7 @@ install:: $(targets)
 		echo $(INSTALL) $(FPERM) $$i $(libdir); \
 		$(INSTALL) $(FPERM) $$i $(libdir); \
 	done;
+
 uninstall::
 	-@for i in $(includes); \
 	do \
@@ -78,6 +80,7 @@ uninstall::
 		echo $(RM) $(libdir)/$$i; \
 		$(RM) $(libdir)/$$i; \
 	done;
+
 test:: $(test_targets)
 	@for i in $(test_targets); \
 	do \

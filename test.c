@@ -21,7 +21,7 @@ int main()
     
     LOGG(50,    "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
     LOGG(37,    "LAST TEST\n(also in two lines)\n\n");
-    for(i = 0; i < 768; i++)
+    for(i = 0; i < 128; i++)
         LOGG(i, "LOGG line to see crit values, this time i == %d", i);
 
     return EXIT_SUCCESS;
