@@ -98,8 +98,9 @@ $(logger_LIB): $(logger_OBJS)
 	$(CC) $(LDFLAGS) -o $@ -shared -Wl,-soname=$(logger_SONAME) $(logger_OBJS)
 
 test_logger_objs = test.o $(logger_LIB) avl_c/libavl.so
-test_logger: $(test_logger_objs)
-	$(CC) $(LDFLAGS) -o $@ $(test_logger_objs)
+test_logger_libs = -ldl
+test_logger: $(test_logger_objs) 
+	$(CC) $(LDFLAGS) -o $@ $(test_logger_objs) $(test_logger_libs)
 
 logg_sample.so_objs = sample.pic_o $(logger_LIB)
 logg_sample.so_libs = avl_c/libavl.so
