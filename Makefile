@@ -20,6 +20,8 @@ OWNER			?= -o `id -u` -g `id -g`
 DPERM			?= -m 0755
 FPERM			?= -m 0644
 XPERM			?= -m 0711
+CFLAGS			?= -g -O0
+PIC_CFLAGS		?= -fPIC
 
 logger_MAJOR	?= 0
 logger_MINOR	?= 1
@@ -34,20 +36,13 @@ includes		+= logger.h
 targets			=  $(mod_targets) $(logger_LIB)
 mod_targets     =  logg_sample.so
 test_targets	+= test_logger
-TOCLEAN         += $(targets)
+TOCLEAN         += $(targets) $(test_targets)
 
 PHONYS			?= all clean install uninstall test
 .SUFFIXES: .pic_o
 .PHONY: $(PHONYS) subdirs
 
 all:: $(targets)
-
-$(PHONYS)::
-	@for i in $(SUBDIRS); \
-	do \
-		echo $(MAKE) -C $$i $@; \
-		$(MAKE) -C $$i $@; \
-	done
 
 clean::
 	$(RM) $(TOCLEAN)
@@ -92,7 +87,7 @@ depend:
 	gcc -MM *.c >.depend
 
 .c.pic_o:
-	$(CC) $(CFLAGS) -c -fPIC -o $@ $<
+	$(CC) $(CFLAGS) -c $(PIC_CFLAGS) -o $@ $<
 
 $(logger_LIB): $(logger_OBJS)
 	$(CC) $(LDFLAGS) -o $@ -shared -Wl,-soname=$(logger_SONAME) $(logger_OBJS)
@@ -101,10 +96,17 @@ test_logger_objs = test.o $(logger_LIB) avl_c/libavl.so
 test_logger_libs = -ldl
 test_logger: $(test_logger_objs) 
 	$(CC) $(LDFLAGS) -o $@ $(test_logger_objs) $(test_logger_libs)
+TOCLEAN += test.o
 
-logg_sample.so_objs = sample.pic_o $(logger_LIB)
-logg_sample.so_libs = avl_c/libavl.so
+# We use the linker here, so we don't include /usr/lib/crt0.o in the output, which
+# already has _init() and _fini() functions, to allow for _init(), _fini() processing.
+logg_sample.so_objs = $(logger_LIB) sample.pic_o avl_c/libavl.so
+logg_sample.so_libs =
 logg_sample.so: $(logg_sample.so_objs)
-	$(CC) $(LDFLAGS) -o $@ -shared $(logg_sample.so_objs) $(logg_sample.so_libs)
+	$(LD) $(LDFLAGS) -o $@ -shared $(logg_sample.so_objs) $(logg_sample.so_libs) -lc
+TOCLEAN += sample.pic_o
+
+avl_c/libavl.so:
+	$(MAKE) -C avl_c all
 
 -include .depend

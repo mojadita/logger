@@ -23,6 +23,8 @@ int main()
     LOGG(37,    "LAST TEST\n(also in two lines)\n\n");
     for(i = 0; i < 128; i++)
         LOGG(i, "LOGG line to see crit values, this time i == %d", i);
+    logg_unregister_channops(channop);
+    logg_unregister_channops(channop);
 
     return EXIT_SUCCESS;
 } /* main */
