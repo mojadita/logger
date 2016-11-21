@@ -75,12 +75,19 @@ typedef struct logg_registry {
     struct timespec lr_last_time;
 } *LOGG_REGISTRY;
 
+typedef struct logg_message {
+    LOGG_REGISTRY   lm_registry;
+    const char    **lm_message;
+} *LOGG_MESSAGE;
+
+
 /* function prototypes */
 
 static int   logg_registry_comparator(const void *_a, const void *_b);
 static void *logg_registry_constructor(const void *_a);
 static void  logg_registry_destructor(const void *_a);
 static int   logg_registry_print(const void *_a, FILE *o);
+static void *logg_thread_monitor(void *_p);
 
 /* variables */
 
@@ -122,26 +129,6 @@ int logg_init()
     return 0;
 } /* logg_init */
 
-AVL_ITERATOR logg_register_channops(
-        const char     *name,
-        LOGG_CHANN_OPS  channops)
-{
-    AVL_ITERATOR it = avl_tree_atkey(
-            logg_global_ctx.gl_chann_ops,
-            name,
-            MT_EQ);
-    if (it) {
-        DEBUG("key \"%s\" already registered", name);
-        return NULL;
-    }
-    it = avl_tree_put(
-            logg_global_ctx.gl_chann_ops,
-            name,
-            channops);
-    channops->co_name = avl_iterator_key(it);
-    return it;
-} /* logg_register_channops */
-
 LOGG_CHANN_OPS logg_channop_lookup(char *name)
 {
     LOGG_CHANN_OPS res;
@@ -170,7 +157,7 @@ LOGG_CHANN_OPS logg_channop_lookup(char *name)
         for (i = 0; path[i]; i++) {
             char dlname[MAX_DLNAME_LENGTH];
             void *dldesc;
-            AVL_ITERATOR (*init_func)(const char *);
+            AVL_ITERATOR (*mod_init)(const char *);
 
             snprintf(dlname, sizeof dlname, "%s/logg_%s.so", path[i], name);
             DEBUG("trying [%s]\n", dlname);
@@ -180,16 +167,17 @@ LOGG_CHANN_OPS logg_channop_lookup(char *name)
             }
             DEBUG("found [%s], trying init function", dlname);
             snprintf(dlname, sizeof dlname, "%s_init", name);
-            init_func = dlsym(dldesc, dlname);
-            if (!init_func) {
+            mod_init = (AVL_ITERATOR (*)(const char *)) dlfunc(dldesc, dlname);
+            if (!mod_init) {
                 DEBUG("no %s function found, continue", dlname);
                 continue;
             }
-            it = init_func(name);
+            it = mod_init(name);
             if (!it) {
                 INFO("%s(\"%s\") => module not registered, continue", dlname, name);
                 continue;
             } /* if */
+
             /* if we reach here, exit the loop, we registered a valid
              * module */
             break;
@@ -211,6 +199,45 @@ LOGG_CHANN logg_chann_lookup(LOGG_CHANN_OPS channops, char *name)
 {
     return NULL;
 } /* logg_chann_lookup */
+
+/* channops supporting functions */
+
+AVL_ITERATOR logg_register_channops(
+        const char     *name,
+        LOGG_CHANN_OPS  channops)
+{
+    AVL_ITERATOR it = avl_tree_atkey(
+            logg_global_ctx.gl_chann_ops,
+            name,
+            MT_EQ);
+    if (it) {
+        DEBUG("key \"%s\" already registered", name);
+        return NULL;
+    }
+    it = avl_tree_put(
+            logg_global_ctx.gl_chann_ops,
+            name,
+            channops);
+    channops->co_name = avl_iterator_key(it);
+    return it;
+} /* logg_register_channops */
+
+int logg_unregister_channops(
+        LOGG_CHANN_OPS  channops)
+{
+    DEBUG("searching for channops \"%s\"", channops->co_name);
+    AVL_ITERATOR it = avl_tree_atkey(
+            logg_global_ctx.gl_chann_ops,
+            channops->co_name,
+            MT_EQ);
+    if (!it) {
+        INFO("channops \"%s\" not registered", channops->co_name);
+        return -1;
+    }
+    avl_iterator_del(it, logg_global_ctx.gl_chann_ops);
+    DEBUG("deleting channops \"%s\"", channops->co_name);
+    return 0;
+} /* logg_register_channops */
 
 /* static functions */
 

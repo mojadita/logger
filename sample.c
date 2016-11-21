@@ -58,6 +58,16 @@ LOGG_FINI_FUNC(sample, name)
     return res;
 } /* LOGG_FINI_FUNC */
 
+void _init(void)
+{
+    DEBUG("initialization");
+}
+
+void _fini(void)
+{
+    DEBUG("finalization");
+}
+
 /* static functions */
 
 /* test code */
