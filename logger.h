@@ -69,11 +69,11 @@
 
 /* types */
 
-typedef struct logg_chann_ops      *LOGG_CHAN_OPS;
+typedef struct logg_chann_ops      *LOGG_CHANN_OPS;
 typedef struct logg_chann          *LOGG_CHANN;
 typedef struct logg_log            *LOGG_LOG;
 
-typedef struct logg_chann_ops {
+struct logg_chann_ops {
     const char         *co_name;
     int               (*co_init)(LOGG_CHANN_OPS *);
     LOGG_CHANN        (*co_open)(const char *name, va_list p);
@@ -85,13 +85,14 @@ typedef struct logg_chann_ops {
     AVL_TREE            co_channs;
     int                 co_refcnt;
     pthread_mutex_t     co_lock;
-} *LOGG_CHANN_OPS;
+};
 
-typedef struct logg_chann {
+struct logg_chann {
+    ssize_t             ch_refcnt;
     char               *ch_name;
     LOGG_CHANN_OPS      ch_channops;
-    pthread_mutex_t    *ch_lock;
-} *LOGG_CHANN;
+    pthread_mutex_t     ch_lock;
+};
 
 /* prototypes */
 
@@ -112,7 +113,7 @@ LOGG_CHANN      logg_chann_vopen(
         va_list         args);
 
 int             logg_chann_close(
-        LOGG_CHAN       chann);
+        LOGG_CHANN       chann);
 
 LOGG_LOG logg_add_log(
         int             prio,
@@ -152,7 +153,7 @@ AVL_ITERATOR logg_register_channops(
         LOGG_CHANN_OPS  channops);
 
 int logg_unregister_channops(
-        LOGG_CHAN_OPS   channops);
+        LOGG_CHANN_OPS   channops);
 
 #endif /* LOGGER_H */
 /* Do not include anything AFTER the line above, as it would not be

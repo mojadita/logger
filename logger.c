@@ -55,6 +55,9 @@
 #ifndef MAX_LOGGV_LINES
 #define MAX_LOGGV_LINES             1024
 #endif
+#ifndef LOGG_PATH_VARIABLE
+#define LOGG_PATH_VARIABLE          "LOGG_PATH"
+#endif
 
 /* local types */
 
@@ -141,7 +144,7 @@ LOGG_CHANN_OPS logg_channop_lookup(char *name)
         int i;
         DEBUG("not registered, looking for \"%s\" module", name);
         if (!path[0]) {
-            char *path_env = getenv("LOGGER_PATH");
+            char *path_env = getenv(LOGG_PATH_VARIABLE);
             int i;
             if (!path_env || !*path_env) path_env = DEFAULT_LOGGER_PATH;
             static char path_buffer[MAX_PATH_LENGTH];
@@ -211,6 +214,7 @@ LOGG_CHANN logg_chann_vopen(LOGG_CHANN_OPS channops, char *name, va_list p)
         return res;
     } else {
         LOGG_CHANN res = malloc(channops->co_inst_size);
+    } /* if */
 
 
     return NULL;
