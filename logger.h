@@ -75,17 +75,22 @@ typedef struct logg_log            *LOGG_LOG;
 
 typedef struct logg_chann_ops {
     const char         *co_name;
+    int               (*co_init)(LOGG_CHANN_OPS *);
     LOGG_CHANN        (*co_open)(const char *name, va_list p);
-    int               (*co_close)(LOGG_CHANN *chann);
-    int               (*co_rotate)(LOGG_CHANN *chann);
-    ssize_t           (*co_write)(LOGG_CHANN *chann, const char *str);
-    ssize_t           (*co_flush)(LOGG_CHANN *chann);
+    int               (*co_close)(LOGG_CHANN chann);
+    int               (*co_rotate)(LOGG_CHANN chann);
+    ssize_t           (*co_write)(LOGG_CHANN chann, const char *str);
+    ssize_t           (*co_flush)(LOGG_CHANN chann);
+    size_t              co_inst_size;
     AVL_TREE            co_channs;
+    int                 co_refcnt;
+    pthread_mutex_t     co_lock;
 } *LOGG_CHANN_OPS;
 
 typedef struct logg_chann {
     char               *ch_name;
     LOGG_CHANN_OPS      ch_channops;
+    pthread_mutex_t    *ch_lock;
 } *LOGG_CHANN;
 
 /* prototypes */
@@ -96,26 +101,26 @@ void logg_end();
 LOGG_CHANN_OPS  logg_channop_lookup(
         char *name);
 
-LOGG_CHANN      logg_chann_lookup(
+LOGG_CHANN      logg_chann_open(
+        LOGG_CHANN_OPS  channops,
+        char           *name,
+                        ...);
+
+LOGG_CHANN      logg_chann_vopen(
         LOGG_CHANN_OPS channops,
-        char *name);
+        char           *name,
+        va_list         args);
 
-LOGG_CHANN logg_register_chann(
-        LOGG_CHANN      chann);
-
-int logg_unregister_chann(
-        LOGG_CHANN      chann);
-
-LOGG_CHANN logg_lookup_chann(
-        char           *chanops_name,
-        char           *chan_name);
+int             logg_chann_close(
+        LOGG_CHAN       chann);
 
 LOGG_LOG logg_add_log(
-        int             crit,
+        int             prio,
         const char     *file,
         const char     *func,
         const int       line_start,
         const int       line_end,
+        const int       flags,
         LOGG_CHANN      chan);
 
 int logg_del_log(

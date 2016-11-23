@@ -195,9 +195,36 @@ LOGG_CHANN_OPS logg_channop_lookup(char *name)
     return res;
 } /* logg_channop_lookup */
 
-LOGG_CHANN logg_chann_lookup(LOGG_CHANN_OPS channops, char *name)
+LOGG_CHANN logg_chann_vopen(LOGG_CHANN_OPS channops, char *name, va_list p)
 {
+    pthread_mutex_lock(&channops->co_lock);
+    AVL_ITERATOR it = avl_tree_atkey(
+            channops->co_channs,
+            name,
+            MT_EQ);
+    if (it) {
+        LOGG_CHANN res = avl_iterator_data(it);
+        pthread_mutex_unlock(&channops->co_lock);
+        pthread_mutex_lock(&res->ch_lock);
+        res->ch_refcnt++;
+        pthread_mutex_unlock(&res->ch_lock);
+        return res;
+    } else {
+        LOGG_CHANN res = malloc(channops->co_inst_size);
+
+
     return NULL;
+} /* logg_chann_vlookup */
+
+LOGG_CHANN logg_chann_open(LOGG_CHANN_OPS channops, char *name, ...)
+{
+    va_list p;
+    LOGG_CHANN res;
+
+    va_start(p, name);
+    res = logg_chann_vopen(channops, name, p);
+    va_end(p);
+    return res;
 } /* logg_chann_lookup */
 
 /* channops supporting functions */
