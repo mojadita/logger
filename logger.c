@@ -115,10 +115,10 @@ static int logg_crits_n = sizeof logg_crits / sizeof logg_crits[0];
 
 int logg_init()
 {
-    logg_global_ctx.gl_chann_ops = new_avl_tree(
+    logg_global_ctx.gl_chann_ops = new_avl_tree( 
             (AVL_FCOMP) strcmp,
-            (AVL_FCONS) strdup,
-            (AVL_FDEST) free,
+            (AVL_FCONS) NULL,
+            (AVL_FDEST) NULL,
             (AVL_FPRNT) fputs);
     assert(logg_global_ctx.gl_chann_ops != NULL);
 
@@ -237,6 +237,7 @@ AVL_ITERATOR logg_register_channops(
         const char     *name,
         LOGG_CHANN_OPS  channops)
 {
+    channops->co_name = name;
     AVL_ITERATOR it = avl_tree_atkey(
             logg_global_ctx.gl_chann_ops,
             name,
@@ -249,18 +250,19 @@ AVL_ITERATOR logg_register_channops(
             logg_global_ctx.gl_chann_ops,
             name,
             channops);
-    channops->co_name = avl_iterator_key(it);
     return it;
 } /* logg_register_channops */
 
 int logg_unregister_channops(
         LOGG_CHANN_OPS  channops)
 {
-    DEBUG("searching for channops \"%s\"", channops->co_name);
+    if (!channops) return -1;
+
     AVL_ITERATOR it = avl_tree_atkey(
             logg_global_ctx.gl_chann_ops,
             channops->co_name,
             MT_EQ);
+    DEBUG("searching for channops \"%s\" => %p", channops->co_name, it);
     if (!it) {
         INFO("channops \"%s\" not registered", channops->co_name);
         return -1;

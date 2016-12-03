@@ -52,17 +52,19 @@ install:: $(targets)
 	do \
 		echo $(INSTALL) $(DPERM) -d $$i; \
 		$(INSTALL) $(DPERM) -d $$i; \
-	done; \
-	for i in $(includes); \
+	done;
+	-@for i in $(includes); \
 	do \
 		echo $(INSTALL) $(FPERM) $$i $(incdir); \
 		$(INSTALL) $(FPERM) $$i $(incdir); \
-	done; \
-	for i in $(targets); \
+	done;
+	-@for i in $(targets); \
 	do \
 		echo $(INSTALL) $(FPERM) $$i $(libdir); \
 		$(INSTALL) $(FPERM) $$i $(libdir); \
 	done;
+	ln -fs $(logger_LIB) $(libdir)/$(logger_SONAME)
+	ln -fs $(logger_SONAME) $(libdir)/$(logger_DEVLIB)
 
 uninstall::
 	-@for i in $(includes); \
@@ -74,7 +76,9 @@ uninstall::
 	do \
 		echo $(RM) $(libdir)/$$i; \
 		$(RM) $(libdir)/$$i; \
-	done;
+	done; \
+	$(RM) $(libdir)/$(logger_SONAME) \
+	$(RM) $(libdir)/$(logger_DEVLIB)
 
 test:: $(test_targets)
 	@for i in $(test_targets); \
