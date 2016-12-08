@@ -53,10 +53,11 @@
 #define FATAL(fmt, args...)     logg(LOGG_FAT, __FILE__, __LINE__, __func__, (fmt), ##args)
 
 #define LOGG_TIMESTAMP         (1 << 0) /* do we output timestamp */
-#define LOGG_CRIT              (1 << 1)
+#define LOGG_CRIT              (1 << 1) /* '' we output priority */
 #define LOGG_FILENAME          (1 << 2) /* do we output filename */
 #define LOGG_LINENUM           (1 << 3) /* '' line number */
 #define LOGG_FUNCNAME          (1 << 4) /* '' function name */
+#define LOGG_POINTER           (LOGG_FILENAME | LOGG_LINENUM | LOG_FUNCNAME)
 #define LOGG_COLOR             (1 << 5) /* '' ansi color sequences(if channel admits it) */
 
 #define LOGG_ALL               (LOGG_TIMESTAMP | LOGG_CRIT |\
@@ -64,6 +65,7 @@
                                 LOGG_FUNCNAME)
 
 /* error codes */
+
 #define LOGG_ERR_SUCCESS                             0
 #define LOGG_ERR_CHANNOP_ALREADY_REGISTERED         -1
 
@@ -122,7 +124,7 @@ LOGG_LOG logg_add_log(
         const int       line_start,
         const int       line_end,
         const int       flags,
-        LOGG_CHANN      chan);
+        LOGG_CHANN      chann);
 
 int logg_del_log(
         LOGG_LOG        log);

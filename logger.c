@@ -68,7 +68,7 @@ typedef struct logg_registry_key {
 } *LOGG_REGISTRY_KEY;
 
 typedef struct logg_registry {
-    LOGG_REGISTRY_KEY
+    struct logg_registry_key
                     lr_key;
 
     LLIST_T         lr_chanlist;
@@ -109,6 +109,7 @@ static char *logg_crits[] = {
     "INFOR",
     "DEBUG"
 };
+
 static int logg_crits_n = sizeof logg_crits / sizeof logg_crits[0];
 
 /* functions */
@@ -215,7 +216,6 @@ LOGG_CHANN logg_chann_vopen(LOGG_CHANN_OPS channops, char *name, va_list p)
     } else {
         LOGG_CHANN res = malloc(channops->co_inst_size);
     } /* if */
-
 
     return NULL;
 } /* logg_chann_vlookup */

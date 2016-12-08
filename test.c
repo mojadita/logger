@@ -9,6 +9,7 @@ int main()
 
     logg_init();
     channop = logg_channop_lookup(test_module);
+
     LOGG(4500, "logg_channop_lookup(\"%s\") ==> %#p", test_module, channop);
     logg(5000, __FILE__, __LINE__, __func__, "Prueba de mensaje verboso");
     DEBUG(      "MESSAGE TEST IN TWO LINES\nWITH A NUMBER(%d)\n", 36);
