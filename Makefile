@@ -71,13 +71,13 @@ uninstall::
 	do \
 		echo $(RM) $(incdir)/$$i; \
 		$(RM) $(incdir)/$$i; \
-	done; \
-	for i in $(targets); \
+	done;
+	-@for i in $(targets); \
 	do \
 		echo $(RM) $(libdir)/$$i; \
 		$(RM) $(libdir)/$$i; \
-	done; \
-	$(RM) $(libdir)/$(logger_SONAME) \
+	done; 
+	$(RM) $(libdir)/$(logger_SONAME)
 	$(RM) $(libdir)/$(logger_DEVLIB)
 
 test:: $(test_targets)
